@@ -1,37 +1,68 @@
-import React from "react";
-import { signInWithGoogle } from "../firebase-config";
-import { FcGoogle } from "react-icons/fc";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { authAPI } from "../services/api";
+
 function Signin() {
-  const history = useHistory()
-  const signin = async () => {
+  const history = useHistory();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
-      const result = await signInWithGoogle()
-      console.log(result);
-      const user = JSON.stringify({
-        uid: result.user.uid,
-        name: result.user.displayName,
-        email: result.user.email,
-        nickname: result.user.displayName.substring(0, result.user.displayName.indexOf(' ')).toLowerCase(),
-        profilePicture: result.user.photoURL,
-      });
-      localStorage.setItem("user", user);
-      history.push("/home")
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("password", password);
+      formData.append("grant_type", "password");
+      formData.append("client_id", "string");
+      formData.append("client_secret", "string");
+      formData.append("scope", "");
 
+      const response = await authAPI.login(formData);
+      const { access_token } = response.data;
+      localStorage.setItem("token", access_token);
+      history.push("/home");
     } catch (error) {
-      console.log("error:", error)
-
+      console.error("Login error:", error);
+      setError("Invalid username or password");
     }
-  }
-  return (
-    <>
-      <div className="d-flex align-items-center justify-content-center" style={{ width: '100vw', height: '100vh' }}>
+  };
 
-        <button className="pb-3" onClick={signin}
-          style={{ color: 'white', backgroundColor: 'black' }}
-        ><span className="me-2 mb-2" style={{ fontSize: '1.5rem', color: 'black' }}><FcGoogle /></span> Sign In with Google</button>
-      </div>
-    </>
+  return (
+    <div
+      className="d-flex align-items-center justify-content-center"
+      style={{ width: "100vw", height: "100vh" }}
+    >
+      <form onSubmit={handleLogin} className="d-flex flex-column gap-3">
+        <div className="form-group">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <input
+            type="password"
+            className="form-control"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        {error && <div className="text-danger">{error}</div>}
+        <button
+          type="submit"
+          className="btn"
+          style={{ color: "white", backgroundColor: "black" }}
+        >
+          Sign In
+        </button>
+      </form>
+    </div>
   );
 }
 

@@ -12,6 +12,7 @@
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@mui/material": "^5.11.14",
+    "axios": "^1.8.4",
     "dayjs": "^1.11.7",
     "decimal.js": "^10.4.3",
     "firebase": "^9.18.0",
